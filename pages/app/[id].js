@@ -28,13 +28,13 @@ export default function AppDetail() {
   const app = apps[id];
 
   if (!app) {
-    return <div className="container mx-auto p-4">App not found</div>;
+    return <div className="container mx-auto p-4">アプリが見つかりません</div>;
   }
 
   return (
     <div className="container mx-auto p-4">
       <Head>
-        <title>{app.name} - Web App Store</title>
+        <title>{app.name} - ウェブアプリストア</title>
         <meta name="description" content={app.description} />
       </Head>
 
@@ -47,7 +47,7 @@ export default function AppDetail() {
             href={`itms-services://?action=download-manifest&url=https://ipa-installer.vercel.com${app.manifestUrl}`}
             className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
           >
-            Install
+            インストール
           </a>
         </div>
       </div>
