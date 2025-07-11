@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const config = {
   api: {
-    bodyParser: false, // formidableを使用するため、Next.jsのbodyParserを無効化
+    bodyParser: false,
   },
 };
 
@@ -16,7 +16,6 @@ export default async function handler(req, res) {
 
   const uploadDir = path.join(process.cwd(), 'public', 'uploads');
   try {
-    // アップロードディレクトリが存在するか確認、なければ作成
     await fs.mkdir(uploadDir, { recursive: true });
   } catch (error) {
     console.error('ディレクトリ作成エラー:', error);
@@ -25,7 +24,7 @@ export default async function handler(req, res) {
   const form = formidable({
     uploadDir,
     keepExtensions: true,
-    maxFileSize: 10 * 1024 * 1024, // 10MB制限
+    maxFileSize: 10 * 1024 * 1024,
     filter: ({ name, originalFilename }) => originalFilename && name === 'file' && originalFilename.endsWith('.ipa'),
   });
 
@@ -40,10 +39,8 @@ export default async function handler(req, res) {
     const uploadPath = path.join(uploadDir, fileName);
     const manifestPath = path.join(uploadDir, `${fileName}.plist`);
 
-    // IPAファイルを移動
     await fs.rename(ipaFile.filepath, uploadPath);
 
-    // マニフェストファイルの生成
     const manifestContent = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -57,7 +54,7 @@ export default async function handler(req, res) {
           <key>kind</key>
           <string>software-package</string>
           <key>url</key>
-          <string>https://ipa-installer.vercel.com/uploads/${fileName}</string>
+          <string>https://ipa-installer-five.vercel.app/uploads/${fileName}</string>
         </dict>
       </array>
       <key>metadata</key>
