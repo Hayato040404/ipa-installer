@@ -48,14 +48,12 @@ export default function Home() {
           <h2 className="text-2xl font-semibold mb-4">注目のアプリ</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {apps.map((app) => (
-              <Link href={`/app/${app.id}`} key={app.id}>
-                <a>
-                  <AppCard
-                    name={app.name}
-                    icon={app.icon}
-                    description={app.description}
-                  />
-                </a>
+              <Link href={`/app/${app.id}`} key={app.id} passHref>
+                <AppCard
+                  name={app.name}
+                  icon={app.icon}
+                  description={app.description}
+                />
               </Link>
             ))}
           </div>
