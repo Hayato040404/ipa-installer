@@ -25,9 +25,11 @@ export default function UploadForm() {
       const data = await response.json();
       if (data.manifestUrl) {
         setManifestUrl(data.manifestUrl);
+      } else {
+        console.error('マニフェストURLが返されませんでした:', data);
       }
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error('アップロード失敗:', error);
     } finally {
       setUploading(false);
     }
@@ -47,15 +49,15 @@ export default function UploadForm() {
           disabled={uploading}
           className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-400"
         >
-          {uploading ? 'Uploading...' : 'Upload IPA'}
+          {uploading ? 'アップロード中...' : 'IPAをアップロード'}
         </button>
       </form>
       {manifestUrl && (
         <a
-          href={`itms-services://?action=download-manifest&url=https://your-vercel-domain.com${manifestUrl}`}
+          href={`itms-services://?action=download-manifest&url=https://ipa-installer-five.vercel.app${manifestUrl}`}
           className="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700"
         >
-          Install Custom App
+          カスタムアプリをインストール
         </a>
       )}
     </div>
