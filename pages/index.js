@@ -3,7 +3,6 @@ import Link from 'next/link';
 import AppCard from '../components/AppCard';
 import SearchBar from '../components/SearchBar';
 import UploadForm from '../components/UploadForm';
-import styles from '../styles/globals.css';
 
 const apps = [
   {
