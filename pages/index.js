@@ -3,6 +3,7 @@ import Link from 'next/link';
 import AppCard from '../components/AppCard';
 import SearchBar from '../components/SearchBar';
 import UploadForm from '../components/UploadForm';
+import '../styles/globals.css'; // CSSを明示的にインポート
 
 const apps = [
   {
