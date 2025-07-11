@@ -1,36 +1,50 @@
 import formidable from 'formidable';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 export const config = {
   api: {
-    bodyParser: false, // formidableを使用するため、Next.jsのデフォルトbodyParserを無効化
+    bodyParser: false, // formidableを使用するため、Next.jsのbodyParserを無効化
   },
 };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'メソッドが許可されていません' });
   }
 
-  const form = formidable({ multiples: false, uploadDir: path.join(process.cwd(), 'public', 'uploads') });
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      return res.status(500).json({ error: 'Upload failed' });
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+  try {
+    // アップロードディレクトリが存在するか確認、なければ作成
+    await fs.mkdir(uploadDir, { recursive: true });
+  } catch (error) {
+    console.error('ディレクトリ作成エラー:', error);
+  }
+
+  const form = formidable({
+    uploadDir,
+    keepExtensions: true,
+    maxFileSize: 10 * 1024 * 1024, // 10MB制限
+    filter: ({ name, originalFilename }) => originalFilename && name === 'file' && originalFilename.endsWith('.ipa'),
+  });
+
+  try {
+    const [fields, files] = await form.parse(req);
+    const ipaFile = files.file?.[0];
+    if (!ipaFile) {
+      return res.status(400).json({ error: 'IPAファイルが必要です' });
     }
 
-    try {
-      const ipaFile = files.file[0];
-      const fileName = `${uuidv4()}.ipa`;
-      const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileName);
-      const manifestPath = path.join(process.cwd(), 'public', 'uploads', `${fileName}.plist`);
+    const fileName = `${uuidv4()}.ipa`;
+    const uploadPath = path.join(uploadDir, fileName);
+    const manifestPath = path.join(uploadDir, `${fileName}.plist`);
 
-      // IPAファイルを移動
-      fs.renameSync(ipaFile.filepath, uploadPath);
+    // IPAファイルを移動
+    await fs.rename(ipaFile.filepath, uploadPath);
 
-      // マニフェストファイルの生成
-      const manifestContent = `<?xml version="1.0" encoding="UTF-8"?>
+    // マニフェストファイルの生成
+    const manifestContent = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -55,20 +69,20 @@ export default async function handler(req, res) {
         <key>kind</key>
         <string>software</string>
         <key>title</key>
-        <string>Custom App</string>
+        <string>カスタムアプリ</string>
       </dict>
     </dict>
   </array>
 </dict>
 </plist>`;
 
-      fs.writeFileSync(manifestPath, manifestContent);
+    await fs.writeFile(manifestPath, manifestContent);
 
-      res.status(200).json({
-        manifestUrl: `/uploads/${fileName}.plist`,
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Upload failed: ' + error.message });
-    }
-  });
+    res.status(200).json({
+      manifestUrl: `/uploads/${fileName}.plist`,
+    });
+  } catch (error) {
+    console.error('アップロードエラー:', error);
+    res.status(500).json({ error: 'アップロードに失敗しました: ' + error.message });
+  }
 }
