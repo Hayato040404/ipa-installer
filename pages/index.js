@@ -32,19 +32,19 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4">
       <Head>
-        <title>Web App Store</title>
-        <meta name="description" content="Install iOS apps like App Store" />
+        <title>ウェブアプリストア</title>
+        <meta name="description" content="App Store風にiOSアプリをインストール" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-center">Web App Store</h1>
+        <h1 className="text-4xl font-bold text-center">ウェブアプリストア</h1>
         <SearchBar />
       </header>
 
       <main>
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Featured Apps</h2>
+          <h2 className="text-2xl font-semibold mb-4">注目のアプリ</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {apps.map((app) => (
               <Link href={`/app/${app.id}`} key={app.id}>
@@ -61,7 +61,7 @@ export default function Home() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4">Upload Your IPA</h2>
+          <h2 className="text-2xl font-semibold mb-4">カスタムIPAをアップロード</h2>
           <UploadForm />
         </section>
       </main>
