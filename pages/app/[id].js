@@ -1,5 +1,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import '../../styles/globals.css';
 
 const apps = {
   tsumtsum: {
@@ -24,11 +26,23 @@ const apps = {
 
 export default function AppDetail() {
   const router = useRouter();
-  const { id } = router.query;
-  const app = apps[id];
+  const [appId, setAppId] = useState(null);
+
+  // クライアントサイドでクエリを取得
+  useEffect(() => {
+    if (router.isReady) {
+      setAppId(router.query.id);
+    }
+  }, [router.isReady, router.query.id]);
+
+  const app = appId ? apps[appId] : null;
+
+  if (!app && appId) {
+    return <div className="container mx-auto p-4">アプリが見つかりません</div>;
+  }
 
   if (!app) {
-    return <div className="container mx-auto p-4">アプリが見つかりません</div>;
+    return null; // クエリがまだ準備できていない場合は何もレンダリングしない
   }
 
   return (
