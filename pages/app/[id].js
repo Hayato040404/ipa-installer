@@ -44,7 +44,7 @@ export default function AppDetail() {
           <h1 className="text-3xl font-bold">{app.name}</h1>
           <p className="text-gray-600 mt-2">{app.description}</p>
           <a
-            href={`itms-services://?action=download-manifest&url=https://your-vercel-domain.com${app.manifestUrl}`}
+            href={`itms-services://?action=download-manifest&url=https://ipa-installer.vercel.com${app.manifestUrl}`}
             className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
           >
             Install
