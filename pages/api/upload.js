@@ -1,23 +1,36 @@
+import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+
+export const config = {
+  api: {
+    bodyParser: false, // formidableを使用するため、Next.jsのデフォルトbodyParserを無効化
+  },
+};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    const ipaFile = req.body.file; // 実際にはフォームデータから取得（例: formidableを使用）
-    const fileName = `${uuidv4()}.ipa`;
-    const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileName);
-    const manifestPath = path.join(process.cwd(), 'public', 'uploads', `${fileName}.plist`);
+  const form = formidable({ multiples: false, uploadDir: path.join(process.cwd(), 'public', 'uploads') });
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'Upload failed' });
+    }
 
-    // IPAファイルを保存（実際にはフォームデータ処理が必要）
-    fs.writeFileSync(uploadPath, ipaFile);
+    try {
+      const ipaFile = files.file[0];
+      const fileName = `${uuidv4()}.ipa`;
+      const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileName);
+      const manifestPath = path.join(process.cwd(), 'public', 'uploads', `${fileName}.plist`);
 
-    // マニフェストファイルの生成
-    const manifestContent = `<?xml version="1.0" encoding="UTF-8"?>
+      // IPAファイルを移動
+      fs.renameSync(ipaFile.filepath, uploadPath);
+
+      // マニフェストファイルの生成
+      const manifestContent = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -30,7 +43,7 @@ export default async function handler(req, res) {
           <key>kind</key>
           <string>software-package</string>
           <key>url</key>
-          <string>https://your-vercel-domain.com/uploads/${fileName}</string>
+          <string>https://ipa-installer.vercel.com/uploads/${fileName}</string>
         </dict>
       </array>
       <key>metadata</key>
@@ -49,20 +62,13 @@ export default async function handler(req, res) {
 </dict>
 </plist>`;
 
-    fs.writeFileSync(manifestPath, manifestContent);
+      fs.writeFileSync(manifestPath, manifestContent);
 
-    res.status(200).json({
-      manifestUrl: `/uploads/${fileName}.plist`,
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Upload failed' });
-  }
+      res.status(200).json({
+        manifestUrl: `/uploads/${fileName}.plist`,
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Upload failed: ' + error.message });
+    }
+  });
 }
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
